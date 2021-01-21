@@ -1,0 +1,419 @@
+#HTML CODE
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Hangman</title>
+        <link rel="stylesheet" href="css/main.css">
+        <meta name="viewport" content="width=device-width">
+    </head>
+    <body>
+        <h1>Hangman Game</h1>
+        <p>This is a game of hangman, like the kind of game you played as a child. You need to guess the name of a famous movie.</p>
+        <h3 id="winlose">YOU WIN</h3>
+        <button id="startgame">New Game</button>
+
+        <div><img width="256" height="256" id="hangman-img" src="/" alt="Hangman"></div>
+        <h2 id="guessme">_</h2>
+
+        <h3>Previous Guesses: <span id="previousGuesses"></span></h3>
+
+        <div><input type="text" id="guess"></div>
+
+
+        <script src="js/movies.js"></script>
+        <script src="js/hangman.js"></script>
+    </body>
+</html>
+
+#CSS CODE
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&display=swap');
+
+body {
+    font-family: 'Itim', cursive;
+}
+
+
+#guessme {
+    font-family: 'Roboto Mono', monospace;
+}
+
+#previousGuesses {
+    color: red;
+}
+
+#winlose {
+    padding: 10px;
+    font-size: 2em;
+    text-align: center;
+}
+
+.lose {
+    background: #ea2541;
+}
+.win {
+    background: #56de56;
+}
+
+#JS CODE
+
+const $ = id => document.getElementById(id);
+let hiddenWord;
+let previousGuesses = [];
+let hangmanProgress = 0;
+let placeHolder = "";
+
+const hangmanImages = [
+    "https://i.ibb.co/0ZYBhBb/Hangman-0.png",
+    "https://i.ibb.co/dgZ58vT/Hangman-1.png",
+    "https://i.ibb.co/mHgyn5s/Hangman-2.png",
+    "https://i.ibb.co/Lkr793f/Hangman-3.png",
+    "https://i.ibb.co/jkRSrfb/Hangman-4.png",
+    "https://i.ibb.co/GJWBvzn/Hangman-5.png",
+    "https://i.ibb.co/N3CmvbH/Hangman-6.png",
+];
+const maxGuesses = hangmanImages.length - 1;
+
+function updateBoard() {
+    $('guessme').innerText = placeHolder;
+    $('hangman-img').src = hangmanImages[hangmanProgress];
+
+
+    // check win condition
+    if (hangmanProgress < maxGuesses && placeHolder == hiddenWord) {
+        // you win!
+        $('guessme').innerText = hiddenWord;
+        $('winlose').innerText = 'YOU WIN';
+        $('winlose').style.display = '';
+        $('winlose').classList.add('win');
+        $('winlose').classList.remove('lose');
+        $('guess').style.display = 'none';
+        $('startgame').style.display = '';
+    } else if (hangmanProgress >= maxGuesses) {
+        // you lost!
+        $('guessme').innerText = hiddenWord;
+        $('winlose').innerText = 'YOU LOSE';
+        $('winlose').style.display = '';
+        $('winlose').classList.remove('win');
+        $('winlose').classList.add('lose');
+        $('guess').style.display = 'none';
+        $('startgame').style.display = '';
+    } else {
+        $('guess').style.display = '';
+        $('startgame').style.display = 'none';
+    }
+}
+
+function startGame() {
+    previousGuesses = [];
+    hangmanProgress = 0;
+    hiddenWord = getRandomMovie().toUpperCase();
+    placeHolder = hiddenWord.replace(/[\da-z]/ig, '_');
+
+    $('previousGuesses').innerText = 'None';
+    $('guess').focus();
+    $('winlose').style.display = 'none';
+
+    updateBoard();
+}
+
+// when user clicks "start game"...
+$('startgame').onclick = startGame;
+
+
+$('guess').onkeyup = function() {
+    const letter = $('guess').value.substring(0,1).toUpperCase();
+    $('guess').value = '';
+
+    if (!(/[\da-z]/i.test(letter))) {
+        // not a valid guess - ignore!
+        return;
+    }
+
+    if (previousGuesses.includes(letter)) {
+        // ignore guess because it was already guessed
+        return;
+    }
+
+    previousGuesses.push(letter);
+    $('previousGuesses').innerText = previousGuesses.join(', ');
+
+    const goodGuess = (hiddenWord.indexOf(letter) !== -1);
+    if (goodGuess) {
+        // replace letters with correct guess
+        for (let i = 0; i < hiddenWord.length; i++) {
+            if (hiddenWord.substring(i, i+1) === letter) {
+                placeHolder = placeHolder.substring(0,i) + letter + placeHolder.substring(i+1);
+            }
+        }
+    } else {
+        // uh-oh, we dun goof'd
+        hangmanProgress++;
+    }
+    updateBoard();
+
+};
+
+
+startGame();
+
+function getRandomMovie() {
+    const movies = [
+        "The Shawshank Redemption",
+        "The Godfather",
+        "The Godfather: Part II",
+        "The Dark Knight",
+        "12 Angry Men",
+        "Schindler's List",
+        "The Lord of the Rings: The Return of the King",
+        "Pulp Fiction",
+        "The Good, the Bad and the Ugly",
+        "The Lord of the Rings: The Fellowship of the Ring",
+        "Fight Club",
+        "Forrest Gump",
+        "Inception",
+        "The Lord of the Rings: The Two Towers",
+        "Star Wars: Episode V - The Empire Strikes Back",
+        "The Matrix",
+        "Goodfellas",
+        "One Flew Over the Cuckoo's Nest",
+        "Seven Samurai",
+        "Seven",
+        "Life Is Beautiful",
+        "City of God",
+        "The Silence of the Lambs",
+        "It's a Wonderful Life",
+        "Star Wars: Episode IV - A New Hope",
+        "Saving Private Ryan",
+        "Spirited Away",
+        "The Green Mile",
+        "Parasite",
+        "Interstellar",
+        "Leon",
+        "The Usual Suspects",
+        "Harakiri",
+        "The Lion King",
+        "Back to the Future",
+        "The Pianist",
+        "Terminator 2: Judgment Day",
+        "American History X",
+        "Modern Times",
+        "Psycho",
+        "Gladiator",
+        "City Lights",
+        "The Departed",
+        "Untouchable",
+        "Whiplash",
+        "Hamilton",
+        "The Prestige",
+        "Grave of the Fireflies",
+        "Once Upon a Time in the West",
+        "Casablanca",
+        "Cinema Paradiso",
+        "Rear Window",
+        "Alien",
+        "Apocalypse Now",
+        "Memento",
+        "The Great Dictator",
+        "Raiders of the Lost Ark",
+        "Django Unchained",
+        "The Lives of Others",
+        "Joker",
+        "Paths of Glory",
+        "WALL·E",
+        "The Shining",
+        "Avengers: Infinity War",
+        "Sunset Blvd.",
+        "Witness for the Prosecution",
+        "Spider-Man: Into the Spider-Verse",
+        "Princess Mononoke",
+        "Oldboy",
+        "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
+        "The Dark Knight Rises",
+        "Once Upon a Time in America",
+        "Aliens",
+        "Your Name.",
+        "Avengers: Endgame",
+        "Coco",
+        "American Beauty",
+        "Braveheart",
+        "3 Idiots",
+        "Das Boot",
+        "Toy Story",
+        "High and Low",
+        "Amadeus",
+        "Capernaum",
+        "Inglourious Basterds",
+        "Star Wars: Episode VI - Return of the Jedi",
+        "Like Stars on Earth",
+        "Reservoir Dogs",
+        "Good Will Hunting",
+        "2001: A Space Odyssey",
+        "Requiem for a Dream",
+        "Vertigo",
+        "M",
+        "Eternal Sunshine of the Spotless Mind",
+        "Dangal",
+        "The Hunt",
+        "Citizen Kane",
+        "1917",
+        "Full Metal Jacket",
+        "Bicycle Thieves",
+        "The Kid",
+        "Singin' in the Rain",
+        "A Clockwork Orange",
+        "North by Northwest",
+        "Snatch",
+        "Scarface",
+        "Taxi Driver",
+        "Ikiru",
+        "Lawrence of Arabia",
+        "Amélie",
+        "Toy Story 3",
+        "The Sting",
+        "Metropolis",
+        "A Separation",
+        "Incendies",
+        "For a Few Dollars More",
+        "Come and See",
+        "The Apartment",
+        "Double Indemnity",
+        "To Kill a Mockingbird",
+        "Up",
+        "Indiana Jones and the Last Crusade",
+        "Heat",
+        "L.A. Confidential",
+        "Die Hard",
+        "Monty Python and the Holy Grail",
+        "Rashomon",
+        "Yojimbo",
+        "Batman Begins",
+        "Green Book",
+        "Downfall",
+        "Children of Heaven",
+        "Unforgiven",
+        "Ran",
+        "Some Like It Hot",
+        "Howl's Moving Castle",
+        "A Beautiful Mind",
+        "All About Eve",
+        "Casino",
+        "The Great Escape",
+        "The Wolf of Wall Street",
+        "Pan's Labyrinth",
+        "The Secret in Their Eyes",
+        "Anand",
+        "Lock, Stock and Two Smoking Barrels",
+        "Raging Bull",
+        "My Neighbour Totoro",
+        "There Will Be Blood",
+        "Judgment at Nuremberg",
+        "The Treasure of the Sierra Madre",
+        "Dial M for Murder",
+        "Three Billboards Outside Ebbing, Missouri",
+        "Chinatown",
+        "The Gold Rush",
+        "My Father and My Son",
+        "Shutter Island",
+        "No Country for Old Men",
+        "V for Vendetta",
+        "The Seventh Seal",
+        "Inside Out",
+        "Warrior",
+        "The Elephant Man",
+        "The Thing",
+        "The Sixth Sense",
+        "Trainspotting",
+        "Jurassic Park",
+        "Gone with the Wind",
+        "The Truman Show",
+        "Wild Strawberries",
+        "Finding Nemo",
+        "Blade Runner",
+        "Vikram Vedha",
+        "Stalker",
+        "Kill Bill: Vol. 1",
+        "The Bridge on the River Kwai",
+        "Room",
+        "Fargo",
+        "Memories of Murder",
+        "Tokyo Story",
+        "The Third Man",
+        "Gran Torino",
+        "On the Waterfront",
+        "Wild Tales",
+        "The Deer Hunter",
+        "Klaus",
+        "In the Name of the Father",
+        "Mary and Max",
+        "Gone Girl",
+        "The Grand Budapest Hotel",
+        "Hacksaw Ridge",
+        "Andhadhun",
+        "Before Sunrise",
+        "Catch Me If You Can",
+        "The Big Lebowski",
+        "Persona",
+        "To Be or Not to Be",
+        "Prisoners",
+        "Sherlock Jr.",
+        "The Bandit",
+        "The General",
+        "How to Train Your Dragon",
+        "Le Mans '66",
+        "Mr. Smith Goes to Washington",
+        "12 Years a Slave",
+        "Barry Lyndon",
+        "Mad Max: Fury Road",
+        "Million Dollar Baby",
+        "Stand by Me",
+        "Network",
+        "Cool Hand Luke",
+        "Dead Poets Society",
+        "Ben-Hur",
+        "Hachi: A Dog's Tale",
+        "Harry Potter and the Deathly Hallows: Part 2",
+        "Platoon",
+        "Into the Wild",
+        "Logan",
+        "The Wages of Fear",
+        "Monty Python's Life of Brian",
+        "Rush",
+        "The Handmaiden",
+        "Joan of Arc",
+        "The 400 Blows",
+        "Andrei Rublev",
+        "Hotel Rwanda",
+        "Spotlight",
+        "Amores Perros",
+        "La Haine",
+        "Rififi",
+        "Nausicaa of the Valley of the Wind",
+        "Rocky",
+        "Gangs of Wasseypur",
+        "Monsters, Inc.",
+        "Rebecca",
+        "Rang De Basanti",
+        "Before Sunset",
+        "Portrait of a Lady on Fire",
+        "In the Mood for Love",
+        "Paris, Texas",
+        "It Happened One Night",
+        "Drishyam",
+        "The Invisible Guest",
+        "The Princess Bride",
+        "The Help",
+        "The Circus",
+        "The Battle of Algiers",
+        "The Terminator",
+        "Aladdin",
+        "Winter Sleep",
+        "Tangerines"
+    ];
+
+    return movies[Math.floor(Math.random()*movies.length)];
+}
+
